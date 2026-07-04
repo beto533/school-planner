@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, TabActions } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AddClassScreen from './src/screens/AddClassScreen';
 import ClassListScreen from './src/screens/ClassListScreen';
+import TasksScreen from './src/screens/TasksScreen';
 
 function HomeScreen() {
   return (
@@ -34,14 +35,6 @@ function ScheduleScreen() {
       onAddClass={() => setAdding(true)}
       refreshKey={refreshKey}
     />
-  );
-}
-
-function TasksScreen() {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Tasks</Text>
-    </View>
   );
 }
 
