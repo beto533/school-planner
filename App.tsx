@@ -6,14 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import AddClassScreen from './src/screens/AddClassScreen';
 import ClassListScreen from './src/screens/ClassListScreen';
 import TasksScreen from './src/screens/TasksScreen';
+import HomeScreen from './src/screens/HomeScreen';
 
-function HomeScreen() {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Home</Text>
-    </View>
-  );
-}
 
 function ScheduleScreen() {
   const [adding, setAdding] = useState(false);

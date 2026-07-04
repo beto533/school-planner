@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,11 @@ import {
   ScrollView,
   StyleSheet,
   Alert,
+  Modal,
+  Platform,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { ClassItem, DayOfWeek } from '../types';
 import { saveClass } from '../storage';
 import { generateId } from '../utils';
@@ -19,6 +23,25 @@ const COLORS = [
   '#66BB6A', '#EF5350', '#AB47BC', '#26A69A',
 ];
 
+function timeToDate(time: string): Date {
+  const [hours,minutes] = time.split(':').map(Number);
+  const d = new Date();
+  d.setHours(hours, minutes, 0, 0);
+  return d;
+}
+
+function dateToTime(date: Date): string {
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
+function formatTimeDisplay(date: Date): string {
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const h = hours % 12 || 12;
+  return `${h}:${minutes} ${ampm}`;
+}
+
 interface Props {
   onSaved: () => void;
 }
@@ -28,8 +51,10 @@ export default function AddClassScreen({ onSaved }: Props) {
   const [instructor, setInstructor] = useState('');
   const [location, setLocation] = useState('');
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([]);
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
+  const [startTime, setStartTime] = useState<Date>(timeToDate('09:00'));
+  const [endTime, setEndTime] = useState<Date>(timeToDate('10:00'));
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
   const [notifyMinutes, setNotifyMinutes] = useState('15');
   const [selectedColor, setSelectedColor] = useState(COLORS[0]);
 
@@ -48,8 +73,8 @@ export default function AddClassScreen({ onSaved }: Props) {
       Alert.alert('Missing info', 'Please select at least one day.');
       return;
     }
-    if (!startTime || !endTime) {
-      Alert.alert('Missing info', 'Please enter start and end times.');
+    if (dateToTime(startTime) >= dateToTime(endTime)) {
+      Alert.alert('Invalid times', 'Start time must be before end time. ');
       return;
     }
 
@@ -61,8 +86,8 @@ export default function AddClassScreen({ onSaved }: Props) {
       color: selectedColor,
       schedule: {
         days: selectedDays,
-        startTime,
-        endTime,
+        startTime: dateToTime(startTime),
+        endTime: dateToTime(endTime),
       },
       notifyMinutesBefore: parseInt(notifyMinutes) || 15,
     };
@@ -123,26 +148,30 @@ export default function AddClassScreen({ onSaved }: Props) {
         ))}
       </View>
 
-      <Text style={styles.label}>Start Time * (HH:MM, 24hr)</Text>
-      <TextInput
-        style={styles.input}
-        value={startTime}
-        onChangeText={setStartTime}
-        placeholder="e.g. 09:00"
-        placeholderTextColor="#999"
-        keyboardType="numeric"
-        maxLength={5}
-      />
+      <Text style={styles.label}>Start Time *</Text>
+      <TouchableOpacity style={styles.timeButton} onPress={() => setShowStartPicker(true)}>
+        <Ionicons name="time-outline" size={18} color="#6C63FF" />
+        <Text style={styles.timeButtonText}>{formatTimeDisplay(startTime)}</Text>
+      </TouchableOpacity>
 
-      <Text style={styles.label}>End Time * (HH:MM, 24hr)</Text>
-      <TextInput
-        style={styles.input}
+      <Text style={styles.label}>End Time *</Text>
+      <TouchableOpacity style={styles.timeButton} onPress={() => setShowEndPicker(true)}>
+        <Ionicons name="time-outline" size={18} color="#6C63FF" />
+        <Text style={styles.timeButtonText}>{formatTimeDisplay(endTime)}</Text>
+      </TouchableOpacity>
+
+      <TimePickerModal
+        visible={showStartPicker}
+        value={startTime}
+        onChange={setStartTime}
+        onClose={() => setShowStartPicker(false)}
+      />
+      
+      <TimePickerModal
+        visible={showEndPicker}
         value={endTime}
-        onChangeText={setEndTime}
-        placeholder="e.g. 10:30"
-        placeholderTextColor="#999"
-        keyboardType="numeric"
-        maxLength={5}
+        onChange={setEndTime}
+        onClose={() => setShowEndPicker(false)}
       />
 
       <Text style={styles.label}>Notify me before class (minutes)</Text>
@@ -204,4 +233,102 @@ const styles = StyleSheet.create({
   colorDotSelected: { borderWidth: 3, borderColor: '#222' },
   saveButton: { marginTop: 32, borderRadius: 12, padding: 16, alignItems: 'center' },
   saveButtonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  timeButton: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 10,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  timeButtonText: { fontSize: 15, color: '#222' },
+});
+
+function TimePickerModal({
+  visible,
+  value,
+  onChange,
+  onClose,
+}: {
+  visible: boolean;
+  value: Date;
+  onChange: (date: Date) => void;
+  onClose: () => void;
+}) {
+  const [tempTime, setTempTime] = useState(value);
+
+  useEffect(() => {
+    setTempTime(value);
+  }, [value, visible]);
+
+  return (
+    <Modal visible={visible} transparent animationType='slide'>
+      <TouchableOpacity
+        style={pickerStyles.overlay}
+        activeOpacity={1}
+        onPress={onClose}
+      >
+        <TouchableOpacity activeOpacity={1} style={pickerStyles.sheet}>
+          <View style={pickerStyles.header}>
+            <TouchableOpacity onPress={onClose}>
+              <Text style={pickerStyles.cancel}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => { onChange(tempTime); onClose(); }}>
+              <Text style={pickerStyles.done}>Done</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={pickerStyles.pickerContainer}>
+            <DateTimePicker
+              value={tempTime}
+              mode="time"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              is24Hour={false}
+              onChange={(_, date) => { if (date) setTempTime(date); }}
+
+              themeVariant='light'
+              textColor='black'
+              style={pickerStyles.nativePicker}
+            />
+          </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
+    </Modal>
+  );
+}
+
+const pickerStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  sheet: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingBottom: 32,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EFEFEF',
+    backgroundColor: '#fff',
+  },
+  pickerContainer: {
+    width: '100%',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nativePicker: {
+    width: '100%',
+    backgroundColor: '#fff',
+  },
+  cancel: { fontSize: 16, color: '#999' },
+  done: { fontSize: 16, color: '#6C63FF', fontWeight: '700' },
 });

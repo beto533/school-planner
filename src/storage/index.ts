@@ -20,9 +20,13 @@ export async function saveClass(item: ClassItem): Promise<void> {
 }
 
 export async function deleteClass(id: string): Promise<void> {
-  const existing = await getClasses();
-  const updated = existing.filter(c => c.id !== id);
-  await AsyncStorage.setItem(KEYS.classes, JSON.stringify(updated));
+  const [existingClasses, existingTasks] = await Promise.all([getClasses(), getTasks()]);
+  const updatedClasses = existingClasses.filter(c => c.id !== id);
+  const updatedTasks = existingTasks.filter(t => t.classId !== id);
+  await Promise.all([ 
+    AsyncStorage.setItem(KEYS.classes, JSON.stringify(updatedClasses)),
+    AsyncStorage.setItem(KEYS.tasks, JSON.stringify(updatedTasks)),
+  ]);
 }
 
 // --- Tasks ---
