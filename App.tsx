@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AddClassScreen from './src/screens/AddClassScreen';
+import ClassListScreen from './src/screens/ClassListScreen';
 
 function HomeScreen() {
   return (
@@ -15,18 +16,24 @@ function HomeScreen() {
 
 function ScheduleScreen() {
   const [adding, setAdding] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   if (adding) {
-    return <AddClassScreen onSaved={() => setAdding(false)} />;
+    return (
+      <AddClassScreen 
+        onSaved={() => {
+          setAdding(false);
+          setRefreshKey(k => k + 1);
+        }} 
+      />
+    );
   }
 
   return (
-    <View style={styles.screen}>
-      <TouchableOpacity style={styles.addButton} onPress={() => setAdding(true)}>
-        <Ionicons name="add" size={28} color="#fff" />
-      </TouchableOpacity>
-      <Text style={{ color: '#999' }}>No classes yet — tap + to add one</Text>
-    </View>
+    <ClassListScreen
+      onAddClass={() => setAdding(true)}
+      refreshKey={refreshKey}
+    />
   );
 }
 
