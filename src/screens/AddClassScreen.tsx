@@ -98,15 +98,6 @@ export default function AddClassScreen({ onSaved, onCancel }: Props) {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F8F8FF'}}>
-      <View style={headerStyles.header}>
-        <TouchableOpacity onPress={onCancel} style={headerStyles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#6C63FF" />
-          <Text style={headerStyles.backText}>Schedule</Text>
-        </TouchableOpacity>
-        <Text style={headerStyles.title}>Add Class</Text>
-        <View style={{ width: 80 }} />
-      </View>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <Text style={styles.label}>Class Name *</Text>
         <TextInput
@@ -212,7 +203,6 @@ export default function AddClassScreen({ onSaved, onCancel }: Props) {
           <Text style={styles.saveButtonText}>Save Class</Text>
         </TouchableOpacity>
       </ScrollView>
-    </View>
   );
 }
 
@@ -255,28 +245,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   timeButtonText: { fontSize: 15, color: '#222' },
-});
-
-const headerStyles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 52,
-    paddingBottom: 12,
-    backgroundColor: '#F8F8FF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EFEFEF',
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    width: 80,
-  },
-  backText: { fontSize: 16, color: '#6C63FF' },
-  title: { fontSize: 17, fontWeight: '700', color: '#222' },
 });
 
 function TimePickerModal({

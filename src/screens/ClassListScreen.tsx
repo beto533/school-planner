@@ -58,15 +58,7 @@ export default function ClassListScreen({ onAddClass, onBack, refreshKey }: Prop
     }
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#F8F8FF' }}>
-            <View style={headerStyles.header}>
-                <TouchableOpacity onPress={onBack} style={headerStyles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#6C63FF" />
-                    <Text style={headerStyles.backText}>Schedule</Text>
-                </TouchableOpacity>
-                <Text style={headerStyles.title}>My Classes</Text>
-                <View style={{ width: 80 }} />
-            </View>
+        <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.list}>
                 {classes.length === 0 ? (
                     <View style={styles.empty}>
@@ -145,26 +137,4 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         elevation: 4,
     },
-});
-
-const headerStyles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 52,
-    paddingBottom: 12,
-    backgroundColor: '#F8F8FF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EFEFEF',
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    width: 80,
-  },
-  backText: { fontSize: 16, color: '#6C63FF' },
-  title: { fontSize: 17, fontWeight: '700', color: '#222' },
 });

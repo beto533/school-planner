@@ -14,9 +14,44 @@ import HomeScreen from './src/screens/HomeScreen';
 import { requestNotificationPermission } from './src/notifications';
 import ScheduleViewScreen from './src/screens/ScheduleViewScreen';
 
-function ScheduleScreen() {
+function ScheduleScreen({ navigation }: any) {
   const [mode, setMode] = useState<'view' | 'list' | 'add'>('view');
   const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    if (mode === 'view') {
+      navigation.setOptions({
+        headerTitle: 'Schedule',
+        headerLeft: () => null,
+      });
+    } else if (mode === 'list') {
+      navigation.setOptions({
+        headerTitle: 'My Classes',
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => setMode('view')}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginLeft: 8 }}
+          >
+            <Ionicons name="arrow-back" size={24} color="#6C63FF" />
+            <Text style={{ color: '#6C63FF', fontSize: 16 }}>Back</Text>
+          </TouchableOpacity>
+        ),
+      });
+    } else if (mode === 'add') {
+      navigation.setOptions({
+        headerTitle: 'Add Class',
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => setMode('view')}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginLeft: 8 }}
+            >
+              <Ionicons name="arrow-back" size={24} color="#6C63FF" />
+              <Text style={{ color: '#6C63FF', fontSize: 16 }}>Back</Text>
+            </TouchableOpacity>
+        ),
+      });
+    }
+  }, [mode]);
 
   if (mode === 'add') {
     return (
@@ -73,6 +108,9 @@ export default function App() {
     <NavigationContainer>
       <Tab.Navigator
         screenOptions={({ route }) => ({
+          headerStyle: { backgroundColor: '#F8F8FF' },
+          headerTitleStyle: { fontWeight: '700', color: '#222' },
+          headerShadowVisible: false,
           tabBarIcon: ({ focused, color, size }) => {
             let iconName: keyof typeof Ionicons.glyphMap;
             if (route.name === 'Home') {
