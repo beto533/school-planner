@@ -44,9 +44,10 @@ function formatTimeDisplay(date: Date): string {
 
 interface Props {
   onSaved: () => void;
+  onCancel: () => void;
 }
 
-export default function AddClassScreen({ onSaved }: Props) {
+export default function AddClassScreen({ onSaved, onCancel }: Props) {
   const [name, setName] = useState('');
   const [instructor, setInstructor] = useState('');
   const [location, setLocation] = useState('');
@@ -97,111 +98,121 @@ export default function AddClassScreen({ onSaved }: Props) {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.label}>Class Name *</Text>
-      <TextInput
-        style={styles.input}
-        value={name}
-        onChangeText={setName}
-        placeholder="e.g. Calculus II"
-        placeholderTextColor="#999"
-      />
+    <View style={{ flex: 1, backgroundColor: '#F8F8FF'}}>
+      <View style={headerStyles.header}>
+        <TouchableOpacity onPress={onCancel} style={headerStyles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#6C63FF" />
+          <Text style={headerStyles.backText}>Schedule</Text>
+        </TouchableOpacity>
+        <Text style={headerStyles.title}>Add Class</Text>
+        <View style={{ width: 80 }} />
+      </View>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <Text style={styles.label}>Class Name *</Text>
+        <TextInput
+          style={styles.input}
+          value={name}
+          onChangeText={setName}
+          placeholder="e.g. Calculus II"
+          placeholderTextColor="#999"
+        />
 
-      <Text style={styles.label}>Instructor</Text>
-      <TextInput
-        style={styles.input}
-        value={instructor}
-        onChangeText={setInstructor}
-        placeholder="e.g. Prof. Smith"
-        placeholderTextColor="#999"
-      />
+        <Text style={styles.label}>Instructor</Text>
+        <TextInput
+          style={styles.input}
+          value={instructor}
+          onChangeText={setInstructor}
+          placeholder="e.g. Prof. Smith"
+          placeholderTextColor="#999"
+        />
 
-      <Text style={styles.label}>Location</Text>
-      <TextInput
-        style={styles.input}
-        value={location}
-        onChangeText={setLocation}
-        placeholder="e.g. Room 204"
-        placeholderTextColor="#999"
-      />
+        <Text style={styles.label}>Location</Text>
+        <TextInput
+          style={styles.input}
+          value={location}
+          onChangeText={setLocation}
+          placeholder="e.g. Room 204"
+          placeholderTextColor="#999"
+        />
 
-      <Text style={styles.label}>Days *</Text>
-      <View style={styles.daysRow}>
-        {DAYS.map(day => (
-          <TouchableOpacity
-            key={day}
-            style={[
-              styles.dayButton,
-              selectedDays.includes(day) && { backgroundColor: selectedColor },
-            ]}
-            onPress={() => toggleDay(day)}
-          >
-            <Text
+        <Text style={styles.label}>Days *</Text>
+        <View style={styles.daysRow}>
+          {DAYS.map(day => (
+            <TouchableOpacity
+              key={day}
               style={[
-                styles.dayText,
-                selectedDays.includes(day) && { color: '#fff' },
+                styles.dayButton,
+                selectedDays.includes(day) && { backgroundColor: selectedColor },
               ]}
+              onPress={() => toggleDay(day)}
             >
-              {day}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+              <Text
+                style={[
+                  styles.dayText,
+                  selectedDays.includes(day) && { color: '#fff' },
+                ]}
+              >
+                {day}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-      <Text style={styles.label}>Start Time *</Text>
-      <TouchableOpacity style={styles.timeButton} onPress={() => setShowStartPicker(true)}>
-        <Ionicons name="time-outline" size={18} color="#6C63FF" />
-        <Text style={styles.timeButtonText}>{formatTimeDisplay(startTime)}</Text>
-      </TouchableOpacity>
+        <Text style={styles.label}>Start Time *</Text>
+        <TouchableOpacity style={styles.timeButton} onPress={() => setShowStartPicker(true)}>
+          <Ionicons name="time-outline" size={18} color="#6C63FF" />
+          <Text style={styles.timeButtonText}>{formatTimeDisplay(startTime)}</Text>
+        </TouchableOpacity>
 
-      <Text style={styles.label}>End Time *</Text>
-      <TouchableOpacity style={styles.timeButton} onPress={() => setShowEndPicker(true)}>
-        <Ionicons name="time-outline" size={18} color="#6C63FF" />
-        <Text style={styles.timeButtonText}>{formatTimeDisplay(endTime)}</Text>
-      </TouchableOpacity>
+        <Text style={styles.label}>End Time *</Text>
+        <TouchableOpacity style={styles.timeButton} onPress={() => setShowEndPicker(true)}>
+          <Ionicons name="time-outline" size={18} color="#6C63FF" />
+          <Text style={styles.timeButtonText}>{formatTimeDisplay(endTime)}</Text>
+        </TouchableOpacity>
 
-      <TimePickerModal
-        visible={showStartPicker}
-        value={startTime}
-        onChange={setStartTime}
-        onClose={() => setShowStartPicker(false)}
-      />
-      
-      <TimePickerModal
-        visible={showEndPicker}
-        value={endTime}
-        onChange={setEndTime}
-        onClose={() => setShowEndPicker(false)}
-      />
+        <TimePickerModal
+          visible={showStartPicker}
+          value={startTime}
+          onChange={setStartTime}
+          onClose={() => setShowStartPicker(false)}
+        />
+        
+        <TimePickerModal
+          visible={showEndPicker}
+          value={endTime}
+          onChange={setEndTime}
+          onClose={() => setShowEndPicker(false)}
+        />
 
-      <Text style={styles.label}>Notify me before class (minutes)</Text>
-      <TextInput
-        style={styles.input}
-        value={notifyMinutes}
-        onChangeText={setNotifyMinutes}
-        keyboardType="numeric"
-        placeholderTextColor="#999"
-      />
+        <Text style={styles.label}>Notify me before class (minutes)</Text>
+        <TextInput
+          style={styles.input}
+          value={notifyMinutes}
+          onChangeText={setNotifyMinutes}
+          keyboardType="numeric"
+          placeholderTextColor="#999"
+        />
 
-      <Text style={styles.label}>Color</Text>
-      <View style={styles.colorsRow}>
-        {COLORS.map(color => (
-          <TouchableOpacity
-            key={color}
-            style={[
-              styles.colorDot,
-              { backgroundColor: color },
-              selectedColor === color && styles.colorDotSelected,
-            ]}
-            onPress={() => setSelectedColor(color)}
-          />
-        ))}
-      </View>
+        <Text style={styles.label}>Color</Text>
+        <View style={styles.colorsRow}>
+          {COLORS.map(color => (
+            <TouchableOpacity
+              key={color}
+              style={[
+                styles.colorDot,
+                { backgroundColor: color },
+                selectedColor === color && styles.colorDotSelected,
+              ]}
+              onPress={() => setSelectedColor(color)}
+            />
+          ))}
+        </View>
 
-      <TouchableOpacity style={[styles.saveButton, { backgroundColor: selectedColor }]} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Save Class</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity style={[styles.saveButton, { backgroundColor: selectedColor }]} onPress={handleSave}>
+          <Text style={styles.saveButtonText}>Save Class</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -244,6 +255,28 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   timeButtonText: { fontSize: 15, color: '#222' },
+});
+
+const headerStyles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 52,
+    paddingBottom: 12,
+    backgroundColor: '#F8F8FF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#EFEFEF',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    width: 80,
+  },
+  backText: { fontSize: 16, color: '#6C63FF' },
+  title: { fontSize: 17, fontWeight: '700', color: '#222' },
 });
 
 function TimePickerModal({

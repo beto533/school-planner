@@ -20,6 +20,7 @@ function ScheduleScreen() {
           setAdding(false);
           setRefreshKey(k => k + 1);
         }} 
+        onCancel={() => setAdding(false)}
       />
     );
   }

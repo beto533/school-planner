@@ -25,8 +25,8 @@ export default function ClassListScreen({ onAddClass, refreshKey }: Props) {
 
     function handleDelete(item: ClassItem) {
         Alert.alert(
-            'Delete Class',
-            `Remove ${item.name} from your schedule?`,
+            `Delete ${item.name} from your schedule?`,
+            'WARNING: Deleting this class will remove all associated tasks!',
             [
                 { text: 'Cancel', style: 'cancel' },
                 {
@@ -41,14 +41,29 @@ export default function ClassListScreen({ onAddClass, refreshKey }: Props) {
         );
     }
 
+    function timeToDate(time: string): Date {
+        const [hours,minutes] = time.split(':').map(Number);
+        const d = new Date();
+        d.setHours(hours, minutes, 0, 0);
+        return d;
+    }
+
+    function formatTimeDisplay(date: Date): string {
+        const hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const h = hours % 12 || 12;
+        return `${h}:${minutes} ${ampm}`;
+    }
+
     return (
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.list}>
                 {classes.length === 0 ? (
                     <View style={styles.empty}>
                         <Ionicons name="calendar-outline" size={48} color="#CCC" />
-                        <Text style={styles.emptyText}>No classes yet</Text>
-                        <Text style={styles.emptySubtext}>Tap + to add your first class</Text>
+                        <Text style={styles.emptyText}>No classes yet.</Text>
+                        <Text style={styles.emptySubtext}>Tap + to add your first class!</Text>
                     </View>
                 ) : (
                     classes.map(item => (
@@ -67,7 +82,7 @@ export default function ClassListScreen({ onAddClass, refreshKey }: Props) {
                                     </Text>
                                 )}
                                 <Text style={styles.cardMeta}>
-                                    <Ionicons name="time-outline" size={12} /> {item.schedule.days.join(', ')} · {item.schedule.startTime} – {item.schedule.endTime}
+                                    <Ionicons name="time-outline" size={12} /> {item.schedule.days.join(', ')} · {formatTimeDisplay(timeToDate(item.schedule.startTime))} – {formatTimeDisplay(timeToDate(item.schedule.endTime))}
                                 </Text>
                                 <Text style={styles.cardMeta}>
                                     <Ionicons name="notifications-outline" size={12} /> {item.notifyMinutesBefore} min before

@@ -8,7 +8,10 @@ import {
     TextInput,
     StyleSheet,
     Alert,
+    Modal,
+    Platform,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from "@expo/vector-icons";
 import { ClassItem, Task } from "../types";
 import { getClasses, getTasks, saveTask, updateTask, deleteTask } from "../storage";
@@ -20,6 +23,9 @@ export default function TasksScreen() {
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
     const [adding, setAdding] = useState(false);
     const [newTaskTitle, setNewTaskTitle] = useState('');
+    const [dueDate, setDueDate] = useState<Date | null>(null);
+    const [showDueDatePicker, setShowDueDatePicker] = useState(false);
+    const [tempDueDate, setTempDueDate] = useState<Date>(new Date());
 
     useFocusEffect(
         useCallback(() => {
@@ -49,12 +55,14 @@ export default function TasksScreen() {
             title: newTaskTitle.trim(),
             completed: false,
             createdAt: new Date().toISOString(),
+            dueDate: dueDate ? dueDate.toISOString() : undefined,
         };
 
         await saveTask(task);
         setTasks(prev => [...prev, task]);
         setNewTaskTitle('');
         setAdding(false);
+        setDueDate(null);
     }
 
     async function handleToggle(task: Task) {
@@ -64,7 +72,7 @@ export default function TasksScreen() {
     }
 
     function handleDelete(task: Task) {
-        Alert.alert('Delete Task', `Remove ${task.title}?`, [
+        Alert.alert('Delete Task?', `Remove ${task.title}?`, [
             { text: 'Cancel', style: 'cancel' },
             {
                 text: 'Delete',
@@ -81,8 +89,8 @@ export default function TasksScreen() {
         return (
             <View style={styles.empty}>
                 <Ionicons name="book-outline" size={48} color="#CCC" />
-                <Text style={styles.emptyText}>No classes yet</Text>
-                <Text style={styles.emptySubtext}>Add a class in the Schedule tab first</Text>
+                <Text style={styles.emptyText}>No classes yet.</Text>
+                <Text style={styles.emptySubtext}>Add a class in the Schedule tab first.</Text>
             </View>
         );
     }
@@ -158,7 +166,7 @@ export default function TasksScreen() {
 
                 {/* Inline add input */}
                 {adding && (
-                    <View style={styles.addRow}>
+                    <View style={styles.addCard}>
                         <TextInput
                             style={styles.addInput}
                             value={newTaskTitle}
@@ -169,12 +177,67 @@ export default function TasksScreen() {
                             onSubmitEditing={handleAddTask}
                             returnKeyType="done"
                         />
-                        <TouchableOpacity onPress={handleAddTask} style={styles.addConfirm}>
-                            <Ionicons name="checkmark" size={22} color="#fff" />
+                        <TouchableOpacity
+                            style={styles.dueDateButton}
+                            onPress={() => setShowDueDatePicker(true)}
+                        >
+                            <Ionicons name="calendar-outline" size={16} color="6C63FF" />
+                            <Text style={styles.dueDateButtonText}>
+                                {dueDate
+                                    ? dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                                    : 'Set due date (optional)'}
+                            </Text>
+                            {dueDate && (
+                                <TouchableOpacity onPress={() => setDueDate(null)}>
+                                    <Ionicons name="close-circle" size={16} color="#999" />
+                                </TouchableOpacity>
+                            )}
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => setAdding(false)} style={styles.addCancel}>
-                            <Ionicons name="close" size={22} color="#999" />
-                        </TouchableOpacity>
+                        <View style={styles.addActions}>
+                            <TouchableOpacity
+                                onPress={() => { setAdding(false); setNewTaskTitle(''); setDueDate(null); }}
+                                style={styles.addCancel}
+                            >
+                                <Text style={styles.addCancelText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={handleAddTask} style={styles.addConfirm}>
+                                <Text style={styles.addConfirmText}>Add Task</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <Modal visible={showDueDatePicker} transparent animationType="slide">
+                            <View style={pickerStyles.overlay}>
+                                <TouchableOpacity
+                                    style={{ flex: 1 }}
+                                    onPress={() => setShowDueDatePicker(false)}
+                                />
+                                <View style={pickerStyles.sheet}>
+                                    <View style={pickerStyles.header}>
+                                        <TouchableOpacity onPress={() => setShowDueDatePicker(false)}>
+                                            <Text style={pickerStyles.cancel}>Cancel</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => {
+                                            setDueDate(tempDueDate);
+                                            setShowDueDatePicker(false);
+                                        }}>
+                                            <Text style={pickerStyles.done}>Done</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={pickerStyles.pickerContainer}>
+                                    <DateTimePicker
+                                        value={tempDueDate}
+                                        mode="date"
+                                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                        minimumDate={new Date()}
+                                        onChange={(_, date) => { if (date) setTempDueDate(date); }}
+                                        themeVariant='light'
+                                        textColor='black'
+                                        style={pickerStyles.nativePicker}
+                                    />
+                                    </View>
+                                </View>
+                            </View>
+                        </Modal>
                     </View>
                 )}
 
@@ -251,19 +314,41 @@ const styles = StyleSheet.create({
     taskTitle: { flex: 1, fontSize: 15, color: '#222' },
     taskDone: { textDecorationLine: 'line-through', color: '#BBB' },
     taskDelete: { paddingLeft: 12 },
-    addRow: {
+    addCard: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        marginBottom: 8,
+        padding: 14,
+        elevation: 2,
+        gap: 10,
+    },
+    addInput: {
+        fontSize: 15,
+        color: '#222',
+        borderBottomWidth: 1,
+        borderBottomColor: '#EFEFEF',
+        paddingBottom: 8,
+    },
+    dueDateButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#fff',
-        borderRadius: 10,
-        marginBottom: 8,
-        padding: 8,
-        elevation: 1,
-        gap: 8,
+        gap: 6,
     },
-    addInput: { flex: 1, fontSize: 15, color: '#222', padding: 4 },
-    addConfirm: { backgroundColor: '#6C63FF', borderRadius: 8, padding: 6 },
-    addCancel: { padding: 6 },
+    dueDateButtonText: { fontSize: 13, color: '#6C63FF' },
+    addActions: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        gap: 12,
+    },
+    addCancel: { padding: 8 },
+    addCancelText: { fontSize: 14, color: '#999' },
+    addConfirm: {
+        backgroundColor: '#6C63FF',
+        borderRadius: 8,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+    },
+    addConfirmText: { fontSize: 14, color: '#fff', fontWeight: '600' },
     fab: {
         position: 'absolute',
         bottom: 24,
@@ -278,4 +363,37 @@ const styles = StyleSheet.create({
     empty: { flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 80, gap: 8 },
     emptyText: { fontSize: 18, fontWeight: '600', color: '#BBB' },
     emptySubtext: { fontSize: 14, color: '#CCC', textAlign: 'center' },
+});
+
+const pickerStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  sheet: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingBottom: 32,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EFEFEF',
+  },
+  pickerContainer: {
+    width: '100%',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nativePicker: {
+    width: '100%',
+    backgroundColor: '#fff',
+  },
+  cancel: { fontSize: 16, color: '#999' },
+  done: { fontSize: 16, color: '#6C63FF', fontWeight: '700' },
 });

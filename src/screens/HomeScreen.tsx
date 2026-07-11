@@ -132,7 +132,7 @@ export default function HomeScreen() {
             ) : (
                 <View style={styles.emptyCard}>
                     <Ionicons name="checkmark-circle-outline" size={28} color="#CCC" />
-                    <Text style={styles.emptyCardText}>No more classes today</Text>
+                    <Text style={styles.emptyCardText}>No more classes today!</Text>
                 </View>
             )}
 
@@ -151,17 +151,17 @@ export default function HomeScreen() {
                             <Text style={styles.taskTitle}>{task.title}</Text>
                             <Text style={styles.taskClass}>{task.className}</Text>
                         </View>
+                        {task.dueDate && (
+                            <Text style={styles.taskDue}>
+                                Due: {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </Text>
+                        )}
                         <TouchableOpacity
                             onPress={() => handleCompleteTask(task)}
                             style={styles.taskCompleteBtn}
                         >
                             <Ionicons name="checkmark-circle-outline" size={24} color="#CCC" />
                         </TouchableOpacity>
-                        {task.dueDate && (
-                            <Text style={styles.taskDue}>
-                                {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                            </Text>
-                        )}
                     </View>
                 ))
             )}
@@ -221,6 +221,6 @@ const styles = StyleSheet.create({
     taskContent: { flex: 1, padding: 12, gap: 2 },
     taskTitle: { fontSize: 14, fontWeight: '600', color: '#222' },
     taskClass: { fontSize: 12, color: '#999' },
-    taskDue: { fontSize: 12, color: '#999', paddingRight: 12 },
+    taskDue: { fontSize: 12, color: '#999', paddingRight: 0 },
     taskCompleteBtn: { paddingHorizontal: 12 },
 });
