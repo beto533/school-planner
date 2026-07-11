@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavigationContainer, TabActions } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet } from 'react-native';
@@ -7,6 +7,7 @@ import AddClassScreen from './src/screens/AddClassScreen';
 import ClassListScreen from './src/screens/ClassListScreen';
 import TasksScreen from './src/screens/TasksScreen';
 import HomeScreen from './src/screens/HomeScreen';
+import { requestNotificationPermission } from './src/notifications';
 
 
 function ScheduleScreen() {
@@ -36,6 +37,10 @@ function ScheduleScreen() {
 const Tab = createBottomTabNavigator();
 
 export default function App() {
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
+
   return (
     <NavigationContainer>
       <Tab.Navigator

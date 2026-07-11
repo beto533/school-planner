@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ClassItem, Task } from '../types';
+import { scheduleClassNotifications, cancelClassNotifications } from '../notifications';
 
 const KEYS = {
   classes: 'classes',
@@ -17,6 +18,7 @@ export async function saveClass(item: ClassItem): Promise<void> {
   const existing = await getClasses();
   const updated = [...existing, item];
   await AsyncStorage.setItem(KEYS.classes, JSON.stringify(updated));
+  await scheduleClassNotifications(item);
 }
 
 export async function deleteClass(id: string): Promise<void> {
@@ -26,6 +28,7 @@ export async function deleteClass(id: string): Promise<void> {
   await Promise.all([ 
     AsyncStorage.setItem(KEYS.classes, JSON.stringify(updatedClasses)),
     AsyncStorage.setItem(KEYS.tasks, JSON.stringify(updatedTasks)),
+    cancelClassNotifications(id),
   ]);
 }
 
