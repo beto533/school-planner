@@ -13,6 +13,8 @@ import TasksScreen from './src/screens/TasksScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import { requestNotificationPermission } from './src/notifications';
 import ScheduleViewScreen from './src/screens/ScheduleViewScreen';
+import { SettingsProvider } from './src/context/SettingsContext';
+import SettingsScreen from './src/screens/SettingsScreen';
 
 function ScheduleScreen({ navigation }: any) {
   const [mode, setMode] = useState<'view' | 'list' | 'add'>('view');
@@ -105,32 +107,47 @@ export default function App() {
   }, []);
 
   return (
-    <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          headerStyle: { backgroundColor: '#F8F8FF' },
-          headerTitleStyle: { fontWeight: '700', color: '#222' },
-          headerShadowVisible: false,
-          tabBarIcon: ({ focused, color, size }) => {
-            let iconName: keyof typeof Ionicons.glyphMap;
-            if (route.name === 'Home') {
-              iconName = focused ? 'home' : 'home-outline';
-            } else if (route.name === 'Schedule') {
-              iconName = focused ? 'calendar' : 'calendar-outline';
-            } else {
-              iconName = focused ? 'checkmark-circle' : 'checkmark-circle-outline';
-            }
-            return <Ionicons name={iconName} size={size} color={color} />;
-          },
-          tabBarActiveTintColor: '#6C63FF',
-          tabBarInactiveTintColor: 'gray',
-        })}
-      >
-        <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Schedule" component={ScheduleScreen} />
-        <Tab.Screen name="Tasks" component={TasksScreen} />
-      </Tab.Navigator>
-    </NavigationContainer>
+    <SettingsProvider>
+      <NavigationContainer>
+        <Tab.Navigator
+          screenOptions={({ route }) => ({
+            headerStyle: { backgroundColor: '#F8F8FF' },
+            headerTitleStyle: { fontWeight: '700', color: '#222' },
+            headerShadowVisible: false,
+            tabBarIcon: ({ focused, color, size }) => {
+              let iconName: keyof typeof Ionicons.glyphMap;
+              if (route.name === 'Home') {
+                iconName = focused ? 'home' : 'home-outline';
+              } else if (route.name === 'Schedule') {
+                iconName = focused ? 'calendar' : 'calendar-outline';
+              } else {
+                iconName = focused ? 'checkmark-circle' : 'checkmark-circle-outline';
+              }
+              return <Ionicons name={iconName} size={size} color={color} />;
+            },
+            tabBarActiveTintColor: '#6C63FF',
+            tabBarInactiveTintColor: 'gray',
+          })}
+        >
+          <Tab.Screen name="Home" component={HomeScreen} />
+          <Tab.Screen name="Schedule" component={ScheduleScreen} />
+          <Tab.Screen name="Tasks" component={TasksScreen} />
+          <Tab.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{
+              tabBarIcon: ({ focused, color, size }) => (
+                <Ionicons
+                  name={focused ? 'settings' : 'settings-outline'}
+                  size={size}
+                  color={color}
+                />
+              ),
+            }}
+          />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </SettingsProvider>
   );
 }
 
